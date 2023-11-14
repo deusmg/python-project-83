@@ -1,0 +1,4 @@
+env:
+  PYTHON_VERSION: 3.7
+  RENDER_SETUP: 'make install'
+  START_COMMAND: 'make start'
