@@ -17,7 +17,18 @@
         </ul>
     </nav>
     <main class="flex-grow-1">
-        {% block main %}{% endblock %}
+        {% block main %}
+            <div class="container">
+                <h1>Анализатор страниц</h1>
+                <form method="POST" action="/add_url">
+                    <div class="mb-3">
+                        <label for="url" class="form-label">Введите URL:</label>
+                        <input type="text" class="form-control" id="url" name="url" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить URL</button>
+                </form>
+            </div>
+        {% endblock %}
     </main>
 <footer class="border-top py-3 mt-5 flex-shrink-0">
   <div class="container-lg">
@@ -28,4 +39,5 @@
 </footer>
 </body>
 </html>
+
 
