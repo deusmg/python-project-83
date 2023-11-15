@@ -29,24 +29,23 @@ def index():
 
 @app.route('/add_url', methods=['POST'])
 def add_url():
-    url_input = request.form.get('url')
-
-    if not url(url_input):
-        flash('Невалидный URL', 'error')
-        return redirect(url_for('index'))
-
-    
-    with get_connection() as conn:
+    url_input = request.form['url']
+    try:
+        conn = get_connection()
         with conn.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url_input,))
             count = cursor.fetchone()[0]
-
-            if count > 0:
-                flash('Этот URL уже существует', 'error')
-            else:
-                cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s )", (url_input, datetime.today()))
+            if count == 0:
+                cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, NOW())", (url_input,))
                 conn.commit()
-                flash('URL успешно добавлен', 'success')
+                flash('URL добавлен успешно', 'success')
+            else:
+                flash('URL уже существует', 'error')
+    except psycopg2.Error as e:
+        app.logger.error(f"Error executing SQL: {e}")
+        flash('Произошла ошибка при выполнении запроса к базе данных', 'error')
+    finally:
+        conn.close()
 
     return redirect(url_for('index'))
 
