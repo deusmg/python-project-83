@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import psycopg2
 from urllib.parse import urlparse
 from validators.url import url
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -20,17 +21,20 @@ def index():
 @app.route('/add_url', methods=['POST'])
 def add_url():
     url_input = request.form.get('url')
-    
+
     if not url(url_input):
         flash('Невалидный URL', 'error')
-    else:
+        return redirect(url_for('index'))
+
+    with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url_input,))
             count = cursor.fetchone()[0]
+
             if count > 0:
                 flash('Этот URL уже существует', 'error')
             else:
-                cursor.execute("INSERT INTO urls (name) VALUES (%s)", (url_input,))
+                cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s )", (url_input, datetime.today()))
                 conn.commit()
                 flash('URL успешно добавлен', 'success')
 
