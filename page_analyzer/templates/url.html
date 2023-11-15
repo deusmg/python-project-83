@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Информация о URL{% endblock %}
+
+{% block main %}
+    <div class="container mt-3">
+        <h1>Информация о URL</h1>
+        <p><strong>ID:</strong> {{ url.id }}</p>
+        <p><strong>URL:</strong> {{ url.name }}</p>
+        <p><strong>Дата создания:</strong> {{ url.created_at }}</p>
+    </div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Список URL{% endblock %}
+
+{% block main %}
+    <div class="container mt-3">
+        <h1>Список URL</h1>
+        <table class="table" data-test="urls">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>URL</th>
+                    <th>Дата создания</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for url in urls %}
+                    <tr data-test="url">
+                        <td>{{ url[0] }}</td>
+                        <td><a href="{{ url_for('show_url', url_id=url[0]) }}">{{ url[1] }}</a></td>  
+                        <td>{{ url[2] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
