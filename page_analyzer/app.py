@@ -5,7 +5,6 @@ import psycopg2
 from urllib.parse import urlparse
 from validators.url import url
 
-
 app = Flask(__name__)
 
 app.secret_key = "secret_key"
@@ -24,13 +23,17 @@ def add_url():
     
     if not url(url_input):
         flash('Невалидный URL', 'error')
-        return redirect(url_for('index'))
+    else:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url_input,))
+            count = cursor.fetchone()[0]
+            if count > 0:
+                flash('Этот URL уже существует', 'error')
+            else:
+                cursor.execute("INSERT INTO urls (name) VALUES (%s)", (url_input,))
+                conn.commit()
+                flash('URL успешно добавлен', 'success')
 
-    with conn.cursor() as cursor:
-        cursor.execute("INSERT INTO urls (name) VALUES (%s)", (url_input,))
-        conn.commit()
-
-    flash('URL успешно добавлен', 'success')
     return redirect(url_for('index'))
 
 @app.route('/urls')
