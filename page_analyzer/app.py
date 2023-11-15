@@ -52,10 +52,17 @@ def add_url():
 
 @app.route('/urls')
 def show_urls():
-    with get_connection() as conn:
+    try:
+        conn = get_connection()
         with conn.cursor() as cursor:
             cursor.execute("SELECT * FROM urls")
             urls = cursor.fetchall()
+    except psycopg2.Error as e:
+        app.logger.error(f"Error executing SQL: {e}")
+        flash('Произошла ошибка при выполнении запроса к базе данных', 'error')
+        return redirect(url_for('index'))
+    finally:
+        conn.close()
 
     return render_template('urls.html', urls=urls)
 
