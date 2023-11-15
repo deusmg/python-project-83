@@ -5,8 +5,8 @@
 {% block main %}
     <div class="container mt-3">
         <h1>Информация о URL</h1>
-        <p><strong>ID:</strong> {{ url[0] }}</p>
-        <p><strong>URL:</strong> {{ url[1] }}</p>
-        <p><strong>Дата создания:</strong> {{ url[2] }}</p>
+        <p data-test="url-id"><strong>ID:</strong> {{ url[0] }}</p>
+        <p data-test="url-value"><strong>URL:</strong> {{ url[1] }}</p>
+        <p data-test="url-created-at"><strong>Дата создания:</strong> {{ url[2] }}</p>
     </div>
 {% endblock %}

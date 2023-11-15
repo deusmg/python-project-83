@@ -8,9 +8,9 @@
         <form method="POST" action="{{ url_for('add_url') }}">
             <div class="mb-3">
                 <label for="url" class="form-label">Введите URL:</label>
-                <input type="text" class="form-control" id="url" name="url" required>
+                <input type="text" class="form-control" id="url" name="url" required data-test="url-input">
             </div>
-            <button type="submit" class="btn btn-primary">Добавить URL</button>
+            <button type="submit" class="btn btn-primary" data-test="submit-button">Добавить URL</button>
         </form>
     </div>
 {% endblock %}
