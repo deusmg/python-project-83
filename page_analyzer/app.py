@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 from dotenv import load_dotenv
 import psycopg2
+from psycopg2 import pool
 from urllib.parse import urlparse
 from validators.url import url
 from datetime import datetime
@@ -12,7 +13,15 @@ app.secret_key = "secret_key"
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
-conn = psycopg2.connect(DATABASE_URL)
+
+connection_pool = psycopg2.pool.SimpleConnectionPool(
+    minconn=1,
+    maxconn=10,
+    dsn=DATABASE_URL
+)
+
+def get_connection():
+    return connection_pool.getconn()
 
 @app.route('/')
 def index():
@@ -26,7 +35,8 @@ def add_url():
         flash('Невалидный URL', 'error')
         return redirect(url_for('index'))
 
-    with psycopg2.connect(DATABASE_URL) as conn:
+    
+    with get_connection() as conn:
         with conn.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url_input,))
             count = cursor.fetchone()[0]
@@ -42,17 +52,19 @@ def add_url():
 
 @app.route('/urls')
 def show_urls():
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM urls")
-        urls = cursor.fetchall()
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM urls")
+            urls = cursor.fetchall()
 
     return render_template('urls.html', urls=urls)
 
 @app.route('/urls/<int:url_id>')
 def show_url(url_id):
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM urls WHERE id = %s", (url_id,))
-        url_data = cursor.fetchone()
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM urls WHERE id = %s", (url_id,))
+            url_data = cursor.fetchone()
 
     if url_data:
         return render_template('url.html', url=url_data)
