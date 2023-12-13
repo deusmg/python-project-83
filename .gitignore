@@ -3,4 +3,3 @@ __pycache__
 .venv
 .render.yaml
 .flake8
-requirements.txt
