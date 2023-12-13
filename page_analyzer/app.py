@@ -3,8 +3,7 @@ import psycopg2
 import psycopg2.extras
 import psycopg2.errors
 from psycopg2.errorcodes import UNIQUE_VIOLATION
-from flask import Flask, render_template, redirect, \
-    request, url_for, flash, get_flashed_messages, make_response
+from flask import Flask, render_template, redirect, request, url_for, flash, get_flashed_messages, make_response
 import requests
 from dotenv import load_dotenv
 from page_analyzer.utils import url_validate, prepare_url, parse_html
