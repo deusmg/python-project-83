@@ -1,76 +1,105 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
 import os
-from dotenv import load_dotenv
 import psycopg2
-from urllib.parse import urlparse
-from validators.url import url as validate_url
-from datetime import datetime
+import psycopg2.extras
+import psycopg2.errors
+from psycopg2.errorcodes import UNIQUE_VIOLATION
+from flask import Flask, render_template, redirect, \
+    request, url_for, flash, get_flashed_messages, make_response
+import requests
+from dotenv import load_dotenv
+from page_analyzer.utils import url_validate, prepare_url, parse_html
+from page_analyzer.db import urls_list_query, add_url_query, \
+    get_url_data_query, get_url_checks_query, insert_check_result_query
+
 
 app = Flask(__name__)
-
-app.secret_key = "secret_key"
-
 load_dotenv()
-DATABASE_URL = os.getenv('DATABASE_URL')
-conn = psycopg2.connect(DATABASE_URL)
+SECRET_KEY = os.getenv('SECRET_KEY')
+app.secret_key = "SECRET_KEY"
 
-def is_valid_url(url):
-    return validate_url(url)
-
-def url_exists(cursor, url):
-    cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url,))
-    count = cursor.fetchone()[0]
-    return count > 0
-
-def insert_url(cursor, url):
-    cursor.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s)", (url, datetime.today()))
-    conn.commit()
-
-def get_all_urls(cursor):
-    cursor.execute("SELECT * FROM urls")
-    return cursor.fetchall()
-
-def get_url_by_id(cursor, url_id):
-    cursor.execute("SELECT * FROM urls WHERE id = %s", (url_id,))
-    return cursor.fetchone()
 
 @app.route('/')
-def index():
-    return render_template('index.html')
+def home_page():
+    return render_template('pages/home.html',)
 
-@app.route('/add_url', methods=['POST'])
-def add_url():
-    url_input = request.form.get('url')
 
-    if not is_valid_url(url_input):
-        flash('Невалидный URL', 'error')
-        return redirect(url_for('index'))
+@app.get('/urls')
+def urls_list():
+    urls = urls_list_query()
+    messages = get_flashed_messages(with_categories=True)
 
-    with conn.cursor() as cursor:
-        if url_exists(cursor, url_input):
-            flash('Этот URL уже существует', 'error')
-        else:
-            insert_url(cursor, url_input)
-            flash('URL успешно добавлен', 'success')
+    return render_template(
+        'pages/urls.html',
+        messages=messages,
+        urls_list=urls
+    )
 
-    return redirect(url_for('index'))
-    
-@app.route('/urls')
-def show_urls():
-    with conn.cursor() as cursor:
-        urls = get_all_urls(cursor)
 
-    return render_template('urls.html', urls=urls)
+@app.post('/urls')
+def add_urls():
+    url = request.form.get('url')
+    is_valid, error_txt = url_validate(url)
 
-@app.route('/urls/<int:url_id>')
-def show_url(url_id):
-    with conn.cursor() as cursor:
-        url_data = get_url_by_id(cursor, url_id)
-
-    if url_data:
-        return render_template('url.html', url=url_data)
+    if not is_valid:
+        flash(error_txt, 'danger')
+        return make_response(render_template('pages/home.html', url_name=url), 422)
     else:
-        return redirect(url_for('show_urls'))
+        url_string = prepare_url(url)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        url_data = add_url_query(url_string)
+        flash('Страница успешно добавлена', 'success')
+    except psycopg2.errors.lookup(UNIQUE_VIOLATION):
+        url_data = get_url_data_query(['id'], f"name='{url_string}'")
+        flash('Страница уже существует', 'info')
+
+    return redirect(url_for('url_profile', url_id=url_data.id), 302)
+
+
+# страница профиля
+@app.route('/urls/<int:url_id>')
+def url_profile(url_id):
+    messages = get_flashed_messages(with_categories=True)
+    url_data = get_url_data_query(['*'], f"id={url_id}")
+    url_checks = get_url_checks_query(url_id)
+
+    if not url_data:
+        return handle_bad_request("404 id not found")
+
+    return render_template(
+        'pages/url_info.html',
+        messages=messages,
+        url_data=url_data,
+        url_checks=url_checks
+    )
+
+
+@app.post('/urls/<int:url_id>/checks')
+def url_checker(url_id):
+    url_data = get_url_data_query(['name'], f"id={url_id}")
+
+    try:
+        r = requests.get(url_data.name)
+        code = r.status_code
+
+        if code >= 500:
+            flash('Произошла ошибка при проверке', 'danger')
+            return redirect(url_for('url_profile', url_id=url_id), 302)
+
+        title, h1, description = parse_html(r.text)
+
+    except OSError:
+        flash('Произошла ошибка при проверке', 'danger')
+        return redirect(url_for('url_profile', url_id=url_id), 302)
+
+    insert_check_result_query(url_id, code, h1, title, description)
+    flash('Страница успешно проверена', 'success')
+
+    return redirect(url_for('url_profile', url_id=url_id), 302)
+
+
+def handle_bad_request(e):
+    return render_template('pages/404.html'), 404
+
+
+app.register_error_handler(404, handle_bad_request)

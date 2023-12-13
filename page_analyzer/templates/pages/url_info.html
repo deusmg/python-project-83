@@ -1,0 +1,52 @@
+{% extends "main_layout.html" %}
+{% block title %}Анализатор страниц{% endblock %}
+{% block main %}
+{% if messages %}
+  {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert" >{{ message }}</div>
+  {% endfor %}
+{% endif %}
+<h1>Сайт: {{url_data.name}}</h1>
+<table  class="table table-bordered table-hover text-nowrap" data-test="url">
+    <tr>
+        <td>ID</td>
+        <td>{{url_data.id}}</td>
+    </tr>
+    <tr>
+        <td>Имя</td>
+        <td>{{url_data.name}}</td>
+    </tr>
+    <tr>
+        <td>Дата создания</td>
+        <td>{{url_data.created_at.strftime("%Y-%m-%d")}}</td>
+    </tr>
+</table>
+<h2>Проверки</h2>
+<form method="post" action="/urls/{{url_data.id}}/checks">
+    <input type="submit" class="btn btn-primary" value="Запустить проверку">
+    </form>
+<table class="table table-bordered table-hover mt-2" data-test="checks">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Код ответа</th>
+        <th>h1</th>
+        <th>title</th>
+        <th>description</th>
+        <th>Дата создания</th>
+      </tr>
+    </thead>
+      <tbody>
+      {%for item in url_checks%}
+        <tr>
+            <td>{{item.id}}</td>
+            <td>{{item.status_code if item.status_code else ""}}</td>
+            <td>{{item.h1 if item.h1 else ""}}</td>
+            <td>{{item.title if item.title else ""}}</td>
+            <td>{{item.description if item.description else ""}}</td>
+            <td>{{item.created_at.strftime("%Y-%m-%d") if item.created_at else ""}}</td>
+        </tr>
+      {%endfor%}
+    </tbody>
+    </table>
+{% endblock %}

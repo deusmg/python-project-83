@@ -1,0 +1,33 @@
+{% extends "main_layout.html" %}
+{% block title %}Анализатор страниц{% endblock %}
+{% block main %}
+{% if messages %}
+  {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert" >{{ message }}</div>
+  {% endfor %}
+{% endif %}
+<h1>Сайты</h1>
+<table class="table table-bordered table-hover text-nowrap" data-test="urls">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Имя</th>
+        <th>Последняя проверка</th>
+        <th>Код ответа</th>
+    </tr>
+    </thead>
+    <tbody>
+        {%for item in urls_list%}
+        <tr>
+            <td>{{item.id}}</td>
+            <td>
+                <a href="/urls/{{item.id}}">{{item.name}}</a>
+            </td>
+            <td>{{item.created_at.strftime("%Y-%m-%d") if item.created_at else ""}}</td>
+            <td>{{item.status_code if item.status_code else ""}}</td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+
+{% endblock %}

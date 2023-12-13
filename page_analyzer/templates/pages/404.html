@@ -1,0 +1,14 @@
+{% extends "main_layout.html" %}
+{% block title %}Анализатор страниц{% endblock %}
+{% block main %}
+{% if messages %}
+  {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert" >{{ message }}</div>
+  {% endfor %}
+{% endif %}
+<div class="container-lg mt-3">
+  <h1>Страница не найдена</h1>
+  <p>Здесь нет того, что вы ищете</p>
+  <p><a href="/">Вернуться на главную</a></p>
+</div>
+{% endblock %}
