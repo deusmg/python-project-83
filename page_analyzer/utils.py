@@ -4,20 +4,16 @@ from bs4 import BeautifulSoup
 
 
 def url_validate(url):
-    is_valid = True
-    error_txt = ""
+    errors = []
 
     if url == "":
-        error_txt = 'URL обязателен'
-        is_valid = False
+        errors.append('URL обязателен')
     elif len(url) > 255:
-        error_txt = 'URL превышает 255 символов'
-        is_valid = False
+        errors.append('URL превышает 255 символов')
     elif url_validator(url) is not True:
-        error_txt = 'Некорректный URL'
-        is_valid = False
+        errors.append('Некорректный URL')
 
-    return is_valid, error_txt
+    return not errors, errors
 
 
 def prepare_url(url):

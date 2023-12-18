@@ -15,18 +15,8 @@ from flask import (
 )
 import requests
 from dotenv import load_dotenv
-from page_analyzer.utils import (
-     url_validate,
-     prepare_url,
-     parse_html
-)
-from page_analyzer.db import (
-    urls_list_query,
-    add_url_query,
-    get_url_data_query,
-    get_url_checks_query,
-    insert_check_result_query
-)
+from page_analyzer import utils
+from page_analyzer import db
 
 app = Flask(__name__)
 load_dotenv()
@@ -41,7 +31,7 @@ def home_page():
 
 @app.get('/urls')
 def urls_list():
-    urls = urls_list_query()
+    urls = db.get_urls_list()
     messages = get_flashed_messages(with_categories=True)
 
     return render_template(
@@ -54,19 +44,19 @@ def urls_list():
 @app.post('/urls')
 def add_urls():
     url = request.form.get('url')
-    is_valid, error_txt = url_validate(url)
+    is_valid, error_txt = utils.url_validate(url)
 
     if not is_valid:
         flash(error_txt, 'danger')
         return make_response(render_template('pages/home.html', url_name=url), 422)
     else:
-        url_string = prepare_url(url)
+        url_string = utils.prepare_url(url)
 
     try:
-        url_data = add_url_query(url_string)
+        url_data = db.add_url(url_string)
         flash('Страница успешно добавлена', 'success')
     except psycopg2.errors.lookup(UNIQUE_VIOLATION):
-        url_data = get_url_data_query(['id'], f"name='{url_string}'")
+        url_data = db.get_url_data(['id'], f"name='{url_string}'")
         flash('Страница уже существует', 'info')
 
     return redirect(url_for('url_profile', url_id=url_data.id), 302)
@@ -76,8 +66,8 @@ def add_urls():
 @app.route('/urls/<int:url_id>')
 def url_profile(url_id):
     messages = get_flashed_messages(with_categories=True)
-    url_data = get_url_data_query(['*'], f"id={url_id}")
-    url_checks = get_url_checks_query(url_id)
+    url_data = db.get_url_data(['*'], f"id={url_id}")
+    url_checks = db.get_url_checks(url_id)
 
     if not url_data:
         return handle_bad_request("404 id not found")
@@ -92,7 +82,7 @@ def url_profile(url_id):
 
 @app.post('/urls/<int:url_id>/checks')
 def url_checker(url_id):
-    url_data = get_url_data_query(['name'], f"id={url_id}")
+    url_data = db.get_url_data(['name'], f"id={url_id}")
 
     try:
         r = requests.get(url_data.name)
@@ -102,13 +92,13 @@ def url_checker(url_id):
             flash('Произошла ошибка при проверке', 'danger')
             return redirect(url_for('url_profile', url_id=url_id), 302)
 
-        title, h1, description = parse_html(r.text)
+        title, h1, description = utils.parse_html(r.text)
 
     except OSError:
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('url_profile', url_id=url_id), 302)
 
-    insert_check_result_query(url_id, code, h1, title, description)
+    db.insert_check_result(url_id, code, h1, title, description)
     flash('Страница успешно проверена', 'success')
 
     return redirect(url_for('url_profile', url_id=url_id), 302)

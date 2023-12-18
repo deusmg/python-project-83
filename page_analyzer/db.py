@@ -8,7 +8,7 @@ load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
-def urls_list_query():
+def get_urls_list():
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
@@ -28,7 +28,7 @@ def urls_list_query():
     return urls
 
 
-def add_url_query(url_string):
+def add_url(url_string):
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
@@ -49,7 +49,7 @@ def add_url_query(url_string):
     return url_id
 
 
-def get_url_data_query(fields, condition):
+def get_url_data(fields, condition):
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
@@ -61,7 +61,7 @@ def get_url_data_query(fields, condition):
     return url_data
 
 
-def get_url_checks_query(url_id):
+def get_url_checks(url_id):
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
@@ -73,7 +73,7 @@ def get_url_checks_query(url_id):
     return url_checks
 
 
-def insert_check_result_query(url_id, code, h1, title, description):
+def insert_check_result(url_id, code, h1, title, description):
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor() as cursor:
         cursor.execute("""INSERT INTO url_checks (
