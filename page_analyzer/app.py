@@ -32,7 +32,7 @@ def home_page():
 
 @app.get('/urls')
 def urls_list():
-    urls = db.get_urls_list()
+    urls = db.get_urls_list(conn)
     messages = get_flashed_messages(with_categories=True)
 
     return render_template(
@@ -54,10 +54,10 @@ def add_urls():
         url_string = utils.prepare_url(url)
 
     try:
-        url_data = db.add_url(url_string)
+        url_data = db.add_url(conn, url_string)
         flash('Страница успешно добавлена', 'success')
     except psycopg2.errors.lookup(UNIQUE_VIOLATION):
-        url_data = db.get_url_data(['id'], f"name='{url_string}'")
+        url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
         flash('Страница уже существует', 'info')
 
     return redirect(url_for('url_profile', url_id=url_data.id), 302)
@@ -67,8 +67,8 @@ def add_urls():
 @app.route('/urls/<int:url_id>')
 def url_profile(url_id):
     messages = get_flashed_messages(with_categories=True)
-    url_data = db.get_url_data(['*'], f"id={url_id}")
-    url_checks = db.get_url_checks(url_id)
+    url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
+    url_checks = db.get_url_checks(conn, url_id)
 
     if not url_data:
         return handle_bad_request("404 id not found")
@@ -83,7 +83,7 @@ def url_profile(url_id):
 
 @app.post('/urls/<int:url_id>/checks')
 def url_checker(url_id):
-    url_data = db.get_url_data(['name'], f"id={url_id}")
+    url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
 
     try:
         r = requests.get(url_data.name)
@@ -99,7 +99,7 @@ def url_checker(url_id):
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('url_profile', url_id=url_id), 302)
 
-    db.insert_check_result(url_id, code, h1, title, description)
+    db.insert_check_result(conn, url_id, code, h1, title, description)
     flash('Страница успешно проверена', 'success')
 
     return redirect(url_for('url_profile', url_id=url_id), 302)
