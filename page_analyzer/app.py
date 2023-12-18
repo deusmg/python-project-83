@@ -47,7 +47,7 @@ def add_urls():
     is_valid, error_txt = utils.url_validate(url)
 
     if not is_valid:
-        flash(error_txt, 'danger')
+        flash(*error_txt, 'danger')
         return make_response(render_template('pages/home.html', url_name=url), 422)
     else:
         url_string = utils.prepare_url(url)
