@@ -36,13 +36,12 @@ def add_url(conn, url_string):
     ) as cursor:
         cursor.execute("""
                             INSERT INTO urls (name, created_at)
-                            values(%(url)s, %(date_time)s)
+                            values(%(url)s, CURRENT_TIMESTAMP)
                             RETURNING id
                         """,
                        {
                            'url': url_string,
-                           'date_time': datetime.today()
-                       })
+                        })
         url_id = cursor.fetchone()
         conn.commit()
 
