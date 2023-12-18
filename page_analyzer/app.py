@@ -22,6 +22,7 @@ app = Flask(__name__)
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 app.secret_key = "SECRET_KEY"
+conn = db.get_db_connection()
 
 
 @app.route('/')

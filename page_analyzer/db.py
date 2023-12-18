@@ -8,8 +8,11 @@ load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
-def get_urls_list():
-    conn = psycopg2.connect(DATABASE_URL)
+def get_db_connection():
+    return psycopg2.connect(DATABASE_URL)
+
+
+def get_urls_list(conn):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
@@ -24,12 +27,10 @@ def get_urls_list():
             ORDER BY urls.id, url_checks.created_at DESC;
         ''')
         urls = cursor.fetchall()
-    conn.close()
     return urls
 
 
-def add_url(url_string):
-    conn = psycopg2.connect(DATABASE_URL)
+def add_url(conn, url_string):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
@@ -44,37 +45,32 @@ def add_url(url_string):
                        })
         url_id = cursor.fetchone()
         conn.commit()
-    conn.close()
 
     return url_id
 
 
-def get_url_data(fields, condition):
-    conn = psycopg2.connect(DATABASE_URL)
+def get_url_data(conn, fields, condition):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
         cursor.execute(f"SELECT {', '.join(fields)} FROM urls WHERE {condition}")
         url_data = cursor.fetchone()
-    conn.close()
-
+    
     return url_data
 
 
-def get_url_checks(url_id):
+def get_url_checks(conn, url_id):
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
         cursor.execute(f'SELECT * FROM url_checks WHERE url_id={url_id}')
         url_checks = cursor.fetchall()
-    conn.close()
-
+    
     return url_checks
 
 
-def insert_check_result(url_id, code, h1, title, description):
-    conn = psycopg2.connect(DATABASE_URL)
+def insert_check_result(conn, url_id, code, h1, title, description):
     with conn.cursor() as cursor:
         cursor.execute("""INSERT INTO url_checks (
                             url_id,
@@ -101,4 +97,4 @@ def insert_check_result(url_id, code, h1, title, description):
                        }
                        )
     conn.commit()
-    conn.close()
+    
