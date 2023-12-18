@@ -42,7 +42,7 @@ def add_url(conn, url_string):
                        {
                            'url': url_string,
                         })
-        url_id = cursor.fetchone()
+        url_id = cursor.fetchone().id
         conn.commit()
 
     return url_id
