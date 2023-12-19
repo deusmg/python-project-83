@@ -22,7 +22,6 @@ app = Flask(__name__)
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 app.secret_key = "SECRET_KEY"
-conn = db.get_db_connection()
 
 
 @app.route('/')
@@ -32,6 +31,7 @@ def home_page():
 
 @app.get('/urls')
 def urls_list():
+    conn = db.get_db_connection()
     urls = db.get_urls_list(conn)
     messages = get_flashed_messages(with_categories=True)
 
@@ -44,6 +44,7 @@ def urls_list():
 
 @app.post('/urls')
 def add_urls():
+    conn = db.get_db_connection()
     url = request.form.get('url')
     is_valid, error_txt = utils.url_validate(url)
 
@@ -66,6 +67,7 @@ def add_urls():
 # страница профиля
 @app.route('/urls/<int:url_id>')
 def url_profile(url_id):
+    conn = db.get_db_connection()
     messages = db.get_flashed_messages(with_categories=True)
     url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
     url_checks = db.get_url_checks(conn, url_id)
@@ -83,6 +85,7 @@ def url_profile(url_id):
 
 @app.post('/urls/<int:url_id>/checks')
 def url_checker(url_id):
+    conn = db.get_db_connection()
     url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
 
     try:
