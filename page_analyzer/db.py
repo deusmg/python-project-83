@@ -43,7 +43,7 @@ def add_url(conn, url_string):
                        {
                            'url': url_string,
                         })
-        url_id = cursor.fetchone().id
+        url_id = cursor.fetchone()
         conn.commit()
     conn.close()
     return url_id
@@ -98,3 +98,4 @@ def insert_check_result(conn, url_id, code, h1, title, description):
                        )
     conn.close()
     conn.commit()
+    
