@@ -27,6 +27,7 @@ def get_urls_list(conn):
             ORDER BY urls.id, url_checks.created_at DESC;
         ''')
         urls = cursor.fetchall()
+    conn.close()
     return urls
 
 
@@ -44,7 +45,7 @@ def add_url(conn, url_string):
                         })
         url_id = cursor.fetchone().id
         conn.commit()
-
+    conn.close()
     return url_id
 
 
@@ -54,7 +55,7 @@ def get_url_data(conn, fields, condition):
     ) as cursor:
         cursor.execute(f"SELECT {', '.join(fields)} FROM urls WHERE {condition}")
         url_data = cursor.fetchone()
-    
+    conn.close()
     return url_data
 
 
@@ -65,7 +66,7 @@ def get_url_checks(conn, url_id):
     ) as cursor:
         cursor.execute(f'SELECT * FROM url_checks WHERE url_id={url_id}')
         url_checks = cursor.fetchall()
-    
+    conn.close()
     return url_checks
 
 
@@ -95,5 +96,5 @@ def insert_check_result(conn, url_id, code, h1, title, description):
                            'description': description
                        }
                        )
+    conn.close()
     conn.commit()
-    
