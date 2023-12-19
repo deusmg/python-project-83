@@ -68,7 +68,7 @@ def add_urls():
 @app.route('/urls/<int:url_id>')
 def url_profile(url_id):
     conn = db.get_db_connection()
-    messages = db.get_flashed_messages(with_categories=True)
+    messages = get_flashed_messages(with_categories=True)
     url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
     url_checks = db.get_url_checks(conn, url_id)
 
