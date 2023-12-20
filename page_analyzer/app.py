@@ -108,7 +108,7 @@ def url_checker(url_id):
     except OSError:
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('url_profile', url_id=url_id), 302)
-    
+
     conn = db.get_db_connection(DATABASE_URL)
     db.insert_check_result(conn, url_id, code, h1, title, description)
     db.close_connection(conn)
