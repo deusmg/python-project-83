@@ -16,13 +16,9 @@ def url_validate(url):
     return not errors, errors
 
 
-def prepare_url(url):
-    u_s = urlparse(url)
-    url_string = f'{u_s.scheme}://{u_s.hostname}'
-
-    if u_s.port:
-        url_string += f':{u_s.port}'
-
+def prepare_url(input_url):
+    url = urlparse(input_url)
+    url_string = f'{url.scheme}://{url.hostname}'
     return url_string
 
 

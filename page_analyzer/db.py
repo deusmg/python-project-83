@@ -52,17 +52,16 @@ def add_url(conn, url_string):
     return url_id
 
 
-def get_url_data(conn, fields, condition):
+def get_url_data(conn, id):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        cursor.execute(f"SELECT {', '.join(fields)} FROM urls WHERE {condition}")
+        cursor.execute('SELECT * FROM urls WHERE id=%s', (id,))
         url_data = cursor.fetchone()
     return url_data
 
 
 def get_url_checks(conn, url_id):
-    conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
