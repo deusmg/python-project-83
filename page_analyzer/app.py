@@ -1,4 +1,8 @@
 import os
+import psycopg2
+import psycopg2.extras
+import psycopg2.errors
+from psycopg2.errorcodes import UNIQUE_VIOLATION
 from flask import (
     Flask,
     render_template,
@@ -58,6 +62,7 @@ def add_urls():
         url_data = db.handle_unique_violation_error(url_string)
 
     return redirect(url_for('url_profile', url_id=url_data.id), 302)
+
 
 
 @app.route('/urls/<int:url_id>')
