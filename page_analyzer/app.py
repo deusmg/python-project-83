@@ -60,11 +60,14 @@ def add_urls():
         url_data = db.add_url(conn, url_string)
         db.close_connection(conn)
         flash('Страница успешно добавлена', 'success')
-    except psycopg2.errors.lookup(UNIQUE_VIOLATION):
-        conn = db.get_db_connection(DATABASE_URL)
-        url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
-        db.close_connection(conn)
-        flash('Страница уже существует', 'info')
+    except psycopg2.Error as e:
+        if e.pgcode == UNIQUE_VIOLATION:
+            conn = db.get_db_connection(DATABASE_URL)
+            url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
+            db.close_connection(conn)
+            flash('Страница уже существует', 'info')
+        else:
+            flash('Произошла ошибка при добавлении страницы', 'danger')
 
     return redirect(url_for('url_profile', url_id=url_data.id), 302)
 
