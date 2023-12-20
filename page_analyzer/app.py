@@ -74,7 +74,7 @@ def add_urls():
 def url_profile(url_id):
     messages = get_flashed_messages(with_categories=True)
     conn = db.get_db_connection(DATABASE_URL)
-    url_data = db.get_url_data(conn, url_id)
+    url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
     db.close_connection(conn)
     conn = db.get_db_connection(DATABASE_URL)
     url_checks = db.get_url_checks(conn, url_id)
@@ -93,7 +93,7 @@ def url_profile(url_id):
 @app.post('/urls/<int:url_id>/checks')
 def url_checker(url_id):
     conn = db.get_db_connection(DATABASE_URL)
-    url_data = db.get_url_data(conn, url_id)
+    url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
     db.close_connection(conn)
     try:
         r = requests.get(url_data.name)
