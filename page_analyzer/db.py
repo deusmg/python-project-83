@@ -53,10 +53,14 @@ def add_url(conn, url_string):
 
 
 def get_url_data(conn, fields, condition):
+    if condition_params is None:
+        condition_params = {}
+
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        cursor.execute(f"SELECT {', '.join(fields)} FROM urls WHERE {condition}")
+        query = f"SELECT {', '.join(fields)} FROM urls WHERE {condition}"
+        cursor.execute(query, condition_params)
         url_data = cursor.fetchone()
     return url_data
 
