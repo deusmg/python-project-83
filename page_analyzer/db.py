@@ -3,6 +3,7 @@ from datetime import datetime
 import psycopg2
 import psycopg2.extras
 from psycopg2.errorcodes import UNIQUE_VIOLATION
+from dotenv import load_dotenv
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
