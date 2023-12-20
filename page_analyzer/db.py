@@ -33,9 +33,11 @@ def handle_unique_violation_error(url_string):
         close_connection(conn)
 
 
-def add_url_with_error_handling(url_string):
+def add_url_with_error_handling(conn, url_string):
     try:
-        return add_url(url_string)
+        conn = get_db_connection(DATABASE_URL)
+        return add_url(conn, url_string)
+
     except psycopg2.errors.UniqueViolation:
         raise UniqueViolationError
 
