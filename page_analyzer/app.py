@@ -1,4 +1,8 @@
 import os
+import psycopg2
+import psycopg2.extras
+import psycopg2.errors
+from psycopg2.errorcodes import UNIQUE_VIOLATION
 from flask import (
     Flask,
     render_template,
@@ -9,6 +13,7 @@ from flask import (
     get_flashed_messages,
     make_response
 )
+import requests
 from dotenv import load_dotenv
 from page_analyzer import utils
 from page_analyzer import db
@@ -16,13 +21,13 @@ from page_analyzer import db
 app = Flask(__name__)
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
-app.secret_key = SECRET_KEY
+app.secret_key = "SECRET_KEY"
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 @app.route('/')
 def home_page():
-    return render_template('pages/home.html')
+    return render_template('pages/home.html',)
 
 
 @app.get('/urls')
@@ -51,21 +56,29 @@ def add_urls():
         url_string = utils.prepare_url(url)
 
     try:
-        url_data = db.add_url(DATABASE_URL, url_string)
+        conn = db.get_db_connection(DATABASE_URL)
+        url_data = db.add_url(conn, url_string)
+        db.close_connection(conn)
         flash('Страница успешно добавлена', 'success')
-    except db.UniqueViolationError:
-        url_data = db.get_url_data(DATABASE_URL, ['id'], f"name='{url_string}'")
+    except psycopg2.errors.lookup(UNIQUE_VIOLATION):
+        conn = db.get_db_connection(DATABASE_URL)
+        url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
+        db.close_connection(conn)
         flash('Страница уже существует', 'info')
 
     return redirect(url_for('url_profile', url_id=url_data.id), 302)
 
 
+
 @app.route('/urls/<int:url_id>')
 def url_profile(url_id):
     messages = get_flashed_messages(with_categories=True)
-    url_data = db.get_url_data(DATABASE_URL, ['*'], f"id={url_id}")
-    url_checks = db.get_url_checks(DATABASE_URL, url_id)
-
+    conn = db.get_db_connection(DATABASE_URL)
+    url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
+    db.close_connection(conn)
+    conn = db.get_db_connection(DATABASE_URL)
+    url_checks = db.get_url_checks(conn, url_id)
+    db.close_connection(conn)
     if not url_data:
         return handle_bad_request("404 id not found")
 
@@ -79,8 +92,9 @@ def url_profile(url_id):
 
 @app.post('/urls/<int:url_id>/checks')
 def url_checker(url_id):
-    url_data = db.get_url_data(DATABASE_URL, ['name'], f"id={url_id}")
-
+    conn = db.get_db_connection(DATABASE_URL)
+    url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
+    db.close_connection(conn)
     try:
         r = requests.get(url_data.name)
         code = r.status_code
@@ -95,7 +109,9 @@ def url_checker(url_id):
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('url_profile', url_id=url_id), 302)
 
-    db.insert_check_result(DATABASE_URL, url_id, code, h1, title, description)
+    conn = db.get_db_connection(DATABASE_URL)
+    db.insert_check_result(conn, url_id, code, h1, title, description)
+    db.close_connection(conn)
     flash('Страница успешно проверена', 'success')
 
     return redirect(url_for('url_profile', url_id=url_id), 302)
