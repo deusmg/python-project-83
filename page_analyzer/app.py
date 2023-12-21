@@ -52,8 +52,12 @@ def add_urls():
         url_string = utils.prepare_url(url)
 
     try:
-        url_data = db.add_url_with_error_handling(url_string)
-        flash('Страница успешно добавлена', 'success')
+        url_id = url_string.id if url_string else None
+        if url_id:
+            flash('Страница уже существует', 'info')
+        else:
+            url_data = db.add_url_with_error_handling(url_string)
+            flash('Страница успешно добавлена', 'success')
     except db.UniqueViolationError:
         url_data = db.handle_unique_violation_error(url_string)
 
