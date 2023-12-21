@@ -52,8 +52,9 @@ def add_urls():
         url_string = utils.prepare_url(url)
 
     try:
-        url_data = db.get_url_data(['id'], f"name='{url_string}'")
-        
+        conn = db.get_db_connection(DATABASE_URL)
+        url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
+        db.close_connection(conn)
         if url_data:
             flash('Страница уже существует', 'info')
         else:

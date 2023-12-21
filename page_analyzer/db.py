@@ -65,7 +65,7 @@ def get_urls_list(conn):
 def add_url(conn, url_string):
     if url_exists(conn, url_string):
         return get_url_data(conn, ['id'], f"name='{url_string}'")
-    
+
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
