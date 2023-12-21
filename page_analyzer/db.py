@@ -4,6 +4,7 @@ import psycopg2
 import psycopg2.extras
 import psycopg2.errors
 from datetime import datetime
+from flask import flash
 
 
 load_dotenv()
@@ -13,6 +14,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 class UniqueViolationError(Exception):
     pass
 
+
 def handle_unique_violation_error(url_string):
     conn = get_db_connection(DATABASE_URL)
     try:
@@ -21,6 +23,7 @@ def handle_unique_violation_error(url_string):
         return url_data
     finally:
         close_connection(conn)
+
 
 def add_url_with_error_handling(url_string):
     try:
@@ -39,25 +42,6 @@ def get_db_connection(datebase_url):
 
 def close_connection(conn):
     conn.close()
-
-
-class UniqueViolationError(Exception):
-    pass
-
-def handle_unique_violation_error(url_string):
-    conn = get_db_connection(DATABASE_URL)
-    try:
-        url_data = get_url_data(conn, ['id'], f"name='{url_string}'")
-        flash('Страница уже существует', 'info')
-        return url_data
-    finally:
-        close_connection(conn)
-
-def add_url_with_error_handling(url_string):
-    try:
-        return add_url_query(url_string)
-    except psycopg2.errors.UniqueViolation:
-        raise UniqueViolationError
 
 
 def get_urls_list(conn):
