@@ -4,7 +4,6 @@ import psycopg2.extras
 import psycopg2.errors
 from datetime import datetime
 
-
 load_dotenv()
 
 
@@ -14,7 +13,7 @@ class UniqueViolationError(Exception):
 
 def handle_unique_violation_error(conn, url_string):
     try:
-        url_data = get_url_data(conn, ['id'], f"name='{url_string}'")
+        url_data = get_url(conn, f"name='{url_string}'")
         return url_data
     finally:
         close_connection(conn)
@@ -29,8 +28,8 @@ def add_url_with_error_handling(conn, url_string):
         raise UniqueViolationError
 
 
-def get_db_connection(datebase_url):
-    conn = psycopg2.connect(datebase_url)
+def get_db_connection(database_url):
+    conn = psycopg2.connect(database_url)
     return conn
 
 
@@ -76,7 +75,7 @@ def add_url(conn, url_string):
     ) as cursor:
         cursor.execute("""
             INSERT INTO urls (name, created_at)
-            values(%(url)s, CURRENT_TIMESTAMP)
+            VALUES (%(url)s, CURRENT_TIMESTAMP)
             RETURNING id
         """, {
             'url': url_string,
@@ -86,14 +85,14 @@ def add_url(conn, url_string):
     return url_id
 
 
-def get_url_data(conn, fields, condition, condition_params=None):
+def get_url(conn, condition, condition_params=None):
     if condition_params is None:
         condition_params = {}
 
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        query = f"SELECT {', '.join(fields)} FROM urls WHERE {condition}"
+        query = f"SELECT * FROM urls WHERE {condition}"
         cursor.execute(query, condition_params)
         url_data = cursor.fetchone()
     return url_data
@@ -117,7 +116,7 @@ def insert_check_result(conn, url_id, code, h1, title, description):
                             h1,
                             title,
                             description
-                        ) values (
+                        ) VALUES (
                             %(url_id)s,
                             %(date_time)s,
                             %(status_code)s,

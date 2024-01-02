@@ -52,12 +52,12 @@ def add_urls():
         url_string = utils.prepare_url(url)
 
     try:
-        url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
+        url_data = db.get_url(conn, f"name='{url_string}'")
         if url_data:
             flash('Страница уже существует', 'info')
         else:
             if url_exists(conn, url_string):
-                return db.get_url_data(conn, ['id'], f"name='{url_string}'")
+                return db.get_url(conn, f"name='{url_string}'")
             else:
                 url_data = db.add_url_with_error_handling(conn, url_string)
                 flash('Страница успешно добавлена', 'success')
@@ -74,9 +74,11 @@ def add_urls():
 def url_profile(url_id):
     conn = db.get_db_connection(DATABASE_URL)
     messages = get_flashed_messages(with_categories=True)
-    url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
+    url_data = db.get_url(conn, f"id={url_id}")
+
     url_checks = db.get_url_checks(conn, url_id)
     db.close_connection(conn)
+
     if not url_data:
         return handle_bad_request("404 id not found")
 
@@ -91,9 +93,9 @@ def url_profile(url_id):
 @app.post('/urls/<int:url_id>/checks')
 def url_checker(url_id):
     conn = db.get_db_connection(DATABASE_URL)
-    url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
+    url_data = db.get_url(conn, f"id={url_id}")
     try:
-        r = requests.get(url_data.name)
+        r = requests.get(url_data)
         code = r.status_code
 
         if code >= 500:
