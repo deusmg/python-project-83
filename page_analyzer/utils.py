@@ -13,7 +13,7 @@ def url_validate(url):
     elif url_validator(url) is not True:
         errors.append('Некорректный URL')
 
-    return not errors, errors
+    return errors
 
 
 def prepare_url(input_url):

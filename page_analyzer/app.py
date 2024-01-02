@@ -43,9 +43,9 @@ def urls_list():
 def add_urls():
     conn = db.get_db_connection(DATABASE_URL)
     url = request.form.get('url')
-    is_valid, error_txt = utils.url_validate(url)
+    error_txt = utils.url_validate(url)
 
-    if not is_valid:
+    if error_txt:
         flash(*error_txt, 'danger')
         return make_response(render_template('pages/home.html', url_name=url), 422)
     else:
