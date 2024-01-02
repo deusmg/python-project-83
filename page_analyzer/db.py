@@ -14,7 +14,7 @@ class UniqueViolationError(Exception):
     pass
 
 
-def handle_unique_violation_error(conn, url_string):
+def handle_unique_violation_error(url_string):
     try:
         url_data = get_url_data(conn, ['id'], f"name='{url_string}'")
         flash('Страница уже существует', 'info')
@@ -23,7 +23,7 @@ def handle_unique_violation_error(conn, url_string):
         close_connection(conn)
 
 
-def add_url_with_error_handling(conn, url_string):
+def add_url_with_error_handling(url_string):
     try:
         url_data = add_url(conn, url_string)
         close_connection(conn)
