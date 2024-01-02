@@ -57,10 +57,14 @@ def add_urls():
         if url_data:
             flash('Страница уже существует', 'info')
         else:
+            conn = db.get_db_connection(DATABASE_URL)
             url_data = db.add_url_with_error_handling(conn, url_string)
+            db.close_connection(conn)
             flash('Страница успешно добавлена', 'success')
     except db.UniqueViolationError:
+        conn = db.get_db_connection(DATABASE_URL)
         url_data = db.handle_unique_violation_error(conn, url_string)
+        db.close_connection(conn)
 
     return redirect(url_for('url_profile', url_id=url_data.id), 302)
 
