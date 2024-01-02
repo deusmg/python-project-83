@@ -56,8 +56,11 @@ def add_urls():
         if url_data:
             flash('Страница уже существует', 'info')
         else:
-            url_data = db.add_url_with_error_handling(conn, url_string)
-            flash('Страница успешно добавлена', 'success')
+            if url_exists(conn, url_string):
+                return db.get_url_data(conn, ['id'], f"name='{url_string}'")
+            else:
+                url_data = db.add_url_with_error_handling(conn, url_string)
+                flash('Страница успешно добавлена', 'success')
         db.close_connection(conn)
     except db.UniqueViolationError:
         url_data = db.handle_unique_violation_error(conn, url_string)
@@ -108,6 +111,12 @@ def url_checker(url_id):
     flash('Страница успешно проверена', 'success')
 
     return redirect(url_for('url_profile', url_id=url_id), 302)
+
+
+def url_exists(conn, url_string):
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url_string,))
+        return cursor.fetchone()[0] > 0
 
 
 def handle_bad_request(e):

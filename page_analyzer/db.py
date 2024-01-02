@@ -71,9 +71,6 @@ def get_urls_list(conn):
 
 
 def add_url(conn, url_string):
-    if url_exists(conn, url_string):
-        return get_url_data(conn, ['id'], f"name='{url_string}'")
-
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
@@ -140,7 +137,4 @@ def insert_check_result(conn, url_id, code, h1, title, description):
     conn.commit()
 
 
-def url_exists(conn, url_string):
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url_string,))
-        return cursor.fetchone()[0] > 0
+
