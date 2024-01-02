@@ -6,6 +6,13 @@
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body class="min-vh-100 d-flex flex-column">
+{% block messages %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert" >{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
     <nav>
         <ul class="nav justify-content-center">
             <li class="nav-item">
@@ -26,12 +33,5 @@
     </div>
   </div>
 </footer>
-{% block messages %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}" role="alert" >{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-{% endblock %}
 </body>
 </html>
