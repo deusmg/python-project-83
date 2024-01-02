@@ -3,7 +3,6 @@ import psycopg2
 import psycopg2.extras
 import psycopg2.errors
 from datetime import datetime
-from flask import flash
 
 
 load_dotenv()
@@ -16,7 +15,6 @@ class UniqueViolationError(Exception):
 def handle_unique_violation_error(conn, url_string):
     try:
         url_data = get_url_data(conn, ['id'], f"name='{url_string}'")
-        flash('Страница уже существует', 'info')
         return url_data
     finally:
         close_connection(conn)

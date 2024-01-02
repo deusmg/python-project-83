@@ -61,6 +61,7 @@ def add_urls():
         db.close_connection(conn)
     except db.UniqueViolationError:
         url_data = db.handle_unique_violation_error(conn, url_string)
+        flash('Страница уже существует', 'info')
         db.close_connection(conn)
 
     return redirect(url_for('url_profile', url_id=url_data.id), 302)
