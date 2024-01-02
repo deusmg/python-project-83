@@ -52,7 +52,7 @@ def add_urls():
         url_string = utils.prepare_url(url)
 
     try:
-        url_data = db.get_url(conn, f"name='{url_string}'")
+        url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
         if url_data:
             flash('Страница уже существует', 'info')
         else:
@@ -70,7 +70,7 @@ def add_urls():
 def url_profile(url_id):
     conn = db.get_db_connection(DATABASE_URL)
     messages = get_flashed_messages(with_categories=True)
-    url_data = db.get_url(conn, f"id={url_id}")
+    url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
     url_checks = db.get_url_checks(conn, url_id)
     db.close_connection(conn)
     if not url_data:
@@ -87,7 +87,7 @@ def url_profile(url_id):
 @app.post('/urls/<int:url_id>/checks')
 def url_checker(url_id):
     conn = db.get_db_connection(DATABASE_URL)
-    url_data = db.get_url(conn, f"name='{url_id}'")
+    url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
     try:
         r = requests.get(url_data.name)
         code = r.status_code
