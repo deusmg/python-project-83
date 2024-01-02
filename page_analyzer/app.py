@@ -41,6 +41,7 @@ def urls_list():
 
 @app.post('/urls')
 def add_urls():
+    conn = db.get_db_connection(DATABASE_URL)
     url = request.form.get('url')
     is_valid, error_txt = utils.url_validate(url)
 
@@ -51,18 +52,14 @@ def add_urls():
         url_string = utils.prepare_url(url)
 
     try:
-        conn = db.get_db_connection(DATABASE_URL)
         url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
-        db.close_connection(conn)
         if url_data:
             flash('Страница уже существует', 'info')
         else:
-            conn = db.get_db_connection(DATABASE_URL)
             url_data = db.add_url_with_error_handling(conn, url_string)
-            db.close_connection(conn)
             flash('Страница успешно добавлена', 'success')
+        db.close_connection(conn)
     except db.UniqueViolationError:
-        conn = db.get_db_connection(DATABASE_URL)
         url_data = db.handle_unique_violation_error(conn, url_string)
         db.close_connection(conn)
 
@@ -71,11 +68,9 @@ def add_urls():
 
 @app.route('/urls/<int:url_id>')
 def url_profile(url_id):
+    conn = db.get_db_connection(DATABASE_URL)
     messages = get_flashed_messages(with_categories=True)
-    conn = db.get_db_connection(DATABASE_URL)
     url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
-    db.close_connection(conn)
-    conn = db.get_db_connection(DATABASE_URL)
     url_checks = db.get_url_checks(conn, url_id)
     db.close_connection(conn)
     if not url_data:
@@ -93,7 +88,6 @@ def url_profile(url_id):
 def url_checker(url_id):
     conn = db.get_db_connection(DATABASE_URL)
     url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
-    db.close_connection(conn)
     try:
         r = requests.get(url_data.name)
         code = r.status_code
@@ -108,7 +102,6 @@ def url_checker(url_id):
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('url_profile', url_id=url_id), 302)
 
-    conn = db.get_db_connection(DATABASE_URL)
     db.insert_check_result(conn, url_id, code, h1, title, description)
     db.close_connection(conn)
     flash('Страница успешно проверена', 'success')
