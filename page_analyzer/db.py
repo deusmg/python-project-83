@@ -51,8 +51,7 @@ def get_urls_list(conn):
                 SELECT created_at, status_code
                 FROM url_checks
                 WHERE url_id = %s
-                ORDER BY created_at DESC
-                LIMIT 1;
+                ORDER BY created_at DESC;
             ''', (url_data.id,))
             url_check_data = cursor.fetchone()
             if url_check_data:
