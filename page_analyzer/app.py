@@ -16,8 +16,7 @@ from page_analyzer import db
 
 app = Flask(__name__)
 load_dotenv()
-SECRET_KEY = os.getenv('SECRET_KEY')
-app.secret_key = "SECRET_KEY"
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 

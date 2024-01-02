@@ -8,7 +8,6 @@ from flask import flash
 
 
 load_dotenv()
-DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 class UniqueViolationError(Exception):
