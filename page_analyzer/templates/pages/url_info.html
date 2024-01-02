@@ -1,11 +1,6 @@
 {% extends "main_layout.html" %}
 {% block title %}Анализатор страниц{% endblock %}
-{% block main %}
-{% if messages %}
-  {% for category, message in messages %}
-    <div class="alert alert-{{ category }}" role="alert" >{{ message }}</div>
-  {% endfor %}
-{% endif %}
+{% block content %}
 <h1>Сайт: {{url_data.name}}</h1>
 <table  class="table table-bordered table-hover text-nowrap" data-test="url">
     <tr>

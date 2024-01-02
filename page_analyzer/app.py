@@ -113,4 +113,9 @@ def handle_bad_request(e):
     return render_template('pages/404.html'), 404
 
 
+def handle_internal_server_error(e):
+    return render_template('pages/500.html'), 500
+
+
 app.register_error_handler(404, handle_bad_request)
+app.register_error_handler(500, handle_internal_server_error)
