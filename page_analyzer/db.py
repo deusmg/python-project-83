@@ -42,17 +42,32 @@ def get_urls_list(conn):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        cursor.execute('''
-            SELECT DISTINCT ON (urls.id)
-            urls.id,
-            urls.name,
-            url_checks.created_at,
-            url_checks.status_code
-            FROM urls
-            LEFT JOIN url_checks ON urls.id = url_checks.url_id
-            ORDER BY urls.id, url_checks.created_at DESC;
-        ''')
-        urls = cursor.fetchall()
+        cursor.execute('SELECT DISTINCT id, name FROM urls;')
+        urls_data = cursor.fetchall()
+
+        url_checks_data = []
+        for url_data in urls_data:
+            cursor.execute('''
+                SELECT created_at, status_code
+                FROM url_checks
+                WHERE url_id = %s
+                ORDER BY created_at DESC
+                LIMIT 1;
+            ''', (url_data.id,))
+            url_check_data = cursor.fetchone()
+            if url_check_data:
+                url_checks_data.append(url_check_data)
+
+    urls = [
+        {
+            'id': url_data.id,
+            'name': url_data.name,
+            'created_at': url_check_data.created_at if url_check_data else None,
+            'status_code': url_check_data.status_code if url_check_data else None,
+        }
+        for url_data, url_check_data in zip(urls_data, url_checks_data)
+    ]
+
     return urls
 
 
