@@ -15,7 +15,7 @@ class UniqueViolationError(Exception):
 
 def handle_unique_violation_error(conn, url_string):
     try:
-        url_data = get_url(conn, f"name='{url_string}'")
+        url_data = get_url_data(conn, ['id'], f"name='{url_string}'")
         flash('Страница уже существует', 'info')
         return url_data
     finally:
@@ -60,7 +60,7 @@ def get_urls_list(conn):
 
 def add_url(conn, url_string):
     if url_exists(conn, url_string):
-        return get_url(conn, f"name='{url_string}'")
+        return get_url_data(conn, ['id'], f"name='{url_string}'")
 
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
@@ -77,14 +77,14 @@ def add_url(conn, url_string):
     return url_id
 
 
-def get_url(conn, condition, condition_params=None):
+def get_url_data(conn, fields, condition, condition_params=None):
     if condition_params is None:
         condition_params = {}
 
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        query = f"SELECT * FROM urls WHERE {condition}"
+        query = f"SELECT {', '.join(fields)} FROM urls WHERE {condition}"
         cursor.execute(query, condition_params)
         url_data = cursor.fetchone()
     return url_data
@@ -94,7 +94,7 @@ def get_url_checks(conn, url_id):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        cursor.execute(f'SELECT * FROM url_checks WHERE url_id={url_id}')
+        cursor.execute('SELECT * FROM url_checks WHERE url_id=%s', (url_id,))
         url_checks = cursor.fetchall()
     return url_checks
 
