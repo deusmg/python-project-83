@@ -135,6 +135,3 @@ def insert_check_result(conn, url_id, code, h1, title, description):
                        }
                        )
     conn.commit()
-
-
-
