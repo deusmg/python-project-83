@@ -1,11 +1,6 @@
-from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
 import psycopg2.errors
-from datetime import datetime
-
-
-load_dotenv()
 
 
 class UniqueViolationError(Exception):
@@ -112,14 +107,12 @@ def insert_check_result(conn, url_id, code, h1, title, description):
     with conn.cursor() as cursor:
         cursor.execute("""INSERT INTO url_checks (
                             url_id,
-                            created_at,
                             status_code,
                             h1,
                             title,
                             description
                         ) values (
                             %(url_id)s,
-                            %(date_time)s,
                             %(status_code)s,
                             %(h1)s,
                             %(title)s,
@@ -127,7 +120,6 @@ def insert_check_result(conn, url_id, code, h1, title, description):
                         )""",
                        {
                            'url_id': int(url_id),
-                           'date_time': datetime.today(),
                            'status_code': int(code),
                            'h1': h1,
                            'title': title,
@@ -135,3 +127,9 @@ def insert_check_result(conn, url_id, code, h1, title, description):
                        }
                        )
     conn.commit()
+
+
+def url_exists(conn, url_string):
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url_string,))
+        return cursor.fetchone()[0] > 0

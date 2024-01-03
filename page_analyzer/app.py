@@ -21,8 +21,8 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 @app.route('/')
-def home_page():
-    return render_template('pages/home.html',)
+def index():
+    return render_template('pages/index.html',)
 
 
 @app.get('/urls')
@@ -43,27 +43,27 @@ def urls_list():
 def add_urls():
     conn = db.get_db_connection(DATABASE_URL)
     url = request.form.get('url')
-    error_txt = utils.url_validate(url)
+    url_errors = utils.url_validate(url)
 
-    if error_txt:
-        flash(*error_txt, 'danger')
-        return make_response(render_template('pages/home.html', url_name=url), 422)
-    else:
-        url_string = utils.prepare_url(url)
+    if url_errors:
+        flash(*url_errors, 'danger')
+        return make_response(render_template('pages/index.html', url_name=url), 422)
+
+    prepared_url = utils.prepare_url(url)
 
     try:
-        url_data = db.get_url_data(conn, ['id'], f"name='{url_string}'")
+        url_data = db.get_url_data(conn, ['id'], f"name='{prepared_url}'")
         if url_data:
             flash('Страница уже существует', 'info')
         else:
-            if url_exists(conn, url_string):
-                return db.get_url_data(conn, ['id'], f"name='{url_string}'")
+            if db.url_exists(conn, prepared_url):
+                return db.get_url_data(conn, ['id'], f"name='{prepared_url}'")
             else:
-                url_data = db.add_url_with_error_handling(conn, url_string)
+                url_data = db.add_url_with_error_handling(conn, prepared_url)
                 flash('Страница успешно добавлена', 'success')
         db.close_connection(conn)
     except db.UniqueViolationError:
-        url_data = db.handle_unique_violation_error(conn, url_string)
+        url_data = db.handle_unique_violation_error(conn, prepared_url)
         flash('Страница уже существует', 'info')
         db.close_connection(conn)
 
@@ -89,7 +89,7 @@ def url_profile(url_id):
 
 
 @app.post('/urls/<int:url_id>/checks')
-def url_checker(url_id):
+def post_url_check(url_id):
     conn = db.get_db_connection(DATABASE_URL)
     url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
     try:
@@ -111,12 +111,6 @@ def url_checker(url_id):
     flash('Страница успешно проверена', 'success')
 
     return redirect(url_for('url_profile', url_id=url_id), 302)
-
-
-def url_exists(conn, url_string):
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT COUNT(*) FROM urls WHERE name = %s", (url_string,))
-        return cursor.fetchone()[0] > 0
 
 
 def handle_bad_request(e):
