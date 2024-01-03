@@ -72,7 +72,7 @@ def add_urls():
         flash('Страница уже существует', 'info')
         db.close_connection(conn)
 
-    return redirect(url_for('url_profile', url_id=url_data.id), 302)
+    return redirect(url_for('get_url', url_id=url_data.id), 302)
 
 
 @app.route('/urls/<int:url_id>')
@@ -103,19 +103,19 @@ def post_url_check(url_id):
 
         if code >= 500:
             flash('Произошла ошибка при проверке', 'danger')
-            return redirect(url_for('url_profile', url_id=url_id), 302)
+            return redirect(url_for('get_url', url_id=url_id), 302)
 
         title, h1, description = utils.parse_html(r.text)
 
     except OSError:
         flash('Произошла ошибка при проверке', 'danger')
-        return redirect(url_for('url_profile', url_id=url_id), 302)
+        return redirect(url_for('get_url', url_id=url_id), 302)
 
     db.insert_check_result(conn, url_id, code, h1, title, description)
     db.close_connection(conn)
     flash('Страница успешно проверена', 'success')
 
-    return redirect(url_for('url_profile', url_id=url_id), 302)
+    return redirect(url_for('get_url', url_id=url_id), 302)
 
 
 def handle_bad_request(e):
