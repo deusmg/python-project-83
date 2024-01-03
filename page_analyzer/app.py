@@ -46,7 +46,8 @@ def add_urls():
 
     if url_errors:
         flash(*url_errors, 'danger')
-        return render_template('pages/index.html', url_name=url, messages=get_flashed_messages(with_categories=True))
+        messages = get_flashed_messages(with_categories=True)
+        return render_template('pages/index.html', url_name=url, messages=messages)
 
     prepared_url = utils.prepare_url(url)
 
