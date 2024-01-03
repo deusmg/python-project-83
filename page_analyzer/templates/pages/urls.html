@@ -16,7 +16,7 @@
         <tr>
             <td>{{item.id}}</td>
             <td>
-                <a href="/urls/{{item.id}}">{{item.name}}</a>
+                <a href="{{ url_for('get_url', url_id=item.id) }}">{{item.name}}</a>
             </td>
             <td>{{item.created_at.strftime("%Y-%m-%d") if item.created_at else ""}}</td>
             <td>{{item.status_code if item.status_code else ""}}</td>
