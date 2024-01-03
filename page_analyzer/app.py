@@ -57,38 +57,38 @@ def add_urls():
     prepared_url = utils.prepare_url(url)
 
     try:
-        url_data = db.get_url_data(conn, ['id'], f"name='{prepared_url}'")
-        if url_data:
+        url_info = db.get_url_info(conn, ['id'], f"name='{prepared_url}'")
+        if url_info:
             flash('Страница уже существует', 'info')
         else:
             if db.url_exists(conn, prepared_url):
-                return db.get_url_data(conn, ['id'], f"name='{prepared_url}'")
+                return db.get_url_info(conn, ['id'], f"name='{prepared_url}'")
             else:
-                url_data = db.add_url_with_error_handling(conn, prepared_url)
+                url_info = db.add_url_with_error_handling(conn, prepared_url)
                 flash('Страница успешно добавлена', 'success')
         db.close_connection(conn)
     except db.UniqueViolationError:
-        url_data = db.handle_unique_violation_error(conn, prepared_url)
+        url_info = db.handle_unique_violation_error(conn, prepared_url)
         flash('Страница уже существует', 'info')
         db.close_connection(conn)
 
-    return redirect(url_for('get_url', url_id=url_data.id), 302)
+    return redirect(url_for('get_url', url_id=url_info.id), 302)
 
 
 @app.route('/urls/<int:url_id>')
 def get_url(url_id):
     conn = db.get_db_connection(DATABASE_URL)
     messages = get_flashed_messages(with_categories=True)
-    url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
+    url_info = db.get_url_info(conn, ['*'], f"id={url_id}")
     url_checks = db.get_url_checks(conn, url_id)
     db.close_connection(conn)
-    if not url_data:
+    if not url_info:
         abort(404)
 
     return render_template(
         'pages/url_info.html',
         messages=messages,
-        url_data=url_data,
+        url_info=url_info,
         url_checks=url_checks
     )
 
@@ -96,9 +96,9 @@ def get_url(url_id):
 @app.post('/urls/<int:url_id>/checks')
 def post_url_check(url_id):
     conn = db.get_db_connection(DATABASE_URL)
-    url_data = db.get_url_data(conn, ['name'], f"id={url_id}")
+    url_info = db.get_url_info(conn, ['name'], f"id={url_id}")
     try:
-        r = requests.get(url_data.name)
+        r = requests.get(url_info.name)
         code = r.status_code
 
         if code >= 500:

@@ -1,23 +1,23 @@
 {% extends "main_layout.html" %}
 {% block title %}Анализатор страниц{% endblock %}
 {% block main %}
-<h1>Сайт: {{url_data.name}}</h1>
+<h1>Сайт: {{url_info.name}}</h1>
 <table  class="table table-bordered table-hover text-nowrap" data-test="url">
     <tr>
         <td>ID</td>
-        <td>{{url_data.id}}</td>
+        <td>{{url_info.id}}</td>
     </tr>
     <tr>
         <td>Имя</td>
-        <td>{{url_data.name}}</td>
+        <td>{{url_info.name}}</td>
     </tr>
     <tr>
         <td>Дата создания</td>
-        <td>{{url_data.created_at.strftime("%Y-%m-%d")}}</td>
+        <td>{{url_info.created_at.strftime("%Y-%m-%d")}}</td>
     </tr>
 </table>
 <h2>Проверки</h2>
-<form method="post" action="{{ url_for('post_url_check', url_id=url_data.id) }}">
+<form method="post" action="{{ url_for('post_url_check', url_id=url_info.id) }}">
     <input type="submit" class="btn btn-primary" value="Запустить проверку">
     </form>
 <table class="table table-bordered table-hover mt-2" data-test="checks">

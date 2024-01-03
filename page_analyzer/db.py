@@ -9,17 +9,17 @@ class UniqueViolationError(Exception):
 
 def handle_unique_violation_error(conn, url_string):
     try:
-        url_data = get_url_data(conn, ['id'], f"name='{url_string}'")
-        return url_data
+        url_info = get_url_info(conn, ['id'], f"name='{url_string}'")
+        return url_info
     finally:
         close_connection(conn)
 
 
 def add_url_with_error_handling(conn, url_string):
     try:
-        url_data = add_url(conn, url_string)
+        url_info = add_url(conn, url_string)
         close_connection(conn)
-        return url_data
+        return url_info
     except psycopg2.errors.UniqueViolation:
         raise UniqueViolationError
 
@@ -81,7 +81,7 @@ def add_url(conn, url_string):
     return url_id
 
 
-def get_url_data(conn, fields, condition, condition_params=None):
+def get_url_info(conn, fields, condition, condition_params=None):
     if condition_params is None:
         condition_params = {}
 
@@ -90,8 +90,8 @@ def get_url_data(conn, fields, condition, condition_params=None):
     ) as cursor:
         query = f"SELECT {', '.join(fields)} FROM urls WHERE {condition}"
         cursor.execute(query, condition_params)
-        url_data = cursor.fetchone()
-    return url_data
+        url_info = cursor.fetchone()
+    return url_info
 
 
 def get_url_checks(conn, url_id):
