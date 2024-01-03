@@ -8,6 +8,7 @@ from flask import (
     flash,
     get_flashed_messages,
     make_response,
+    abort,
 )
 import requests
 from dotenv import load_dotenv
@@ -26,7 +27,7 @@ def index():
 
 
 @app.get('/urls')
-def urls_list():
+def get_urls():
     conn = db.get_db_connection(DATABASE_URL)
     urls = db.get_urls_list(conn)
     db.close_connection(conn)
@@ -75,14 +76,14 @@ def add_urls():
 
 
 @app.route('/urls/<int:url_id>')
-def url_profile(url_id):
+def get_url(url_id):
     conn = db.get_db_connection(DATABASE_URL)
     messages = get_flashed_messages(with_categories=True)
     url_data = db.get_url_data(conn, ['*'], f"id={url_id}")
     url_checks = db.get_url_checks(conn, url_id)
     db.close_connection(conn)
     if not url_data:
-        return handle_bad_request("404 id not found")
+        abort(404)
 
     return render_template(
         'pages/url_info.html',
