@@ -7,7 +7,6 @@ from flask import (
     url_for,
     flash,
     get_flashed_messages,
-    make_response
 )
 import requests
 from dotenv import load_dotenv
@@ -47,7 +46,7 @@ def add_urls():
 
     if url_errors:
         flash(*url_errors, 'danger')
-        return make_response(render_template('pages/index.html', url_name=url), 422)
+        return render_template('pages/index.html', url_name=url, messages=get_flashed_messages(with_categories=True))
 
     prepared_url = utils.prepare_url(url)
 
