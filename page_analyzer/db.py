@@ -37,29 +37,24 @@ def get_urls_list(conn):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        cursor.execute('SELECT DISTINCT id, name FROM urls;')
-        urls_data = cursor.fetchall()
+        cursor.execute('SELECT id, name FROM urls;')
+        urls_data = {url.id: url for url in cursor.fetchall()}
 
-        url_checks_data = []
-        for url_data in urls_data:
-            cursor.execute('''
-                SELECT created_at, status_code
-                FROM url_checks
-                WHERE url_id = %s
-                ORDER BY created_at DESC;
-            ''', (url_data.id,))
-            url_check_data = cursor.fetchone()
-            if url_check_data:
-                url_checks_data.append(url_check_data)
+        cursor.execute('''
+            SELECT url_id, MAX(created_at) AS created_at, MAX(status_code) AS status_code
+            FROM url_checks
+            GROUP BY url_id;
+        ''')
+        url_checks_data = {check.url_id: check for check in cursor.fetchall()}
 
     urls = [
         {
-            'id': url_data.id,
+            'id': url_id,
             'name': url_data.name,
-            'created_at': url_check_data.created_at if url_check_data else None,
-            'status_code': url_check_data.status_code if url_check_data else None,
+            'created_at': url_checks_data[url_id].created_at if url_id in url_checks_data else None,
+            'status_code': url_checks_data[url_id].status_code if url_id in url_checks_data else None,
         }
-        for url_data, url_check_data in zip(urls_data, url_checks_data)
+        for url_id, url_data in urls_data.items()
     ]
 
     return urls
