@@ -57,12 +57,12 @@ def add_urls():
     prepared_url = utils.prepare_url(url)
 
     try:
-        url_info = db.get_url_info(conn, ['id'], f"name='{prepared_url}'")
+        url_info = db.get_url_info(conn, 'id', 'name=%(prepared_url)s', {'prepared_url': prepared_url})
         if url_info:
             flash('Страница уже существует', 'info')
         else:
             if db.url_exists(conn, prepared_url):
-                return db.get_url_info(conn, ['id'], f"name='{prepared_url}'")
+                return db.get_url_info(conn, 'id', 'name=%(prepared_url)s', {'prepared_url': prepared_url})
             else:
                 url_info = db.add_url_with_error_handling(conn, prepared_url)
                 flash('Страница успешно добавлена', 'success')
@@ -79,7 +79,7 @@ def add_urls():
 def get_url(url_id):
     conn = db.get_db_connection(DATABASE_URL)
     messages = get_flashed_messages(with_categories=True)
-    url_info = db.get_url_info(conn, ['*'], f"id={url_id}")
+    url_info = db.get_url_info(conn, '*', 'id=%(url_id)s', {'url_id': url_id})
     url_checks = db.get_url_checks(conn, url_id)
     db.close_connection(conn)
     if not url_info:
@@ -96,7 +96,7 @@ def get_url(url_id):
 @app.post('/urls/<int:url_id>/checks')
 def post_url_check(url_id):
     conn = db.get_db_connection(DATABASE_URL)
-    url_info = db.get_url_info(conn, ['name'], f"id={url_id}")
+    url_info = db.get_url_info(conn, 'name', 'id=%(url_id)s', {'url_id': url_id})
     try:
         r = requests.get(url_info.name)
         code = r.status_code

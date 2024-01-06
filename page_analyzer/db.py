@@ -83,7 +83,7 @@ def get_url_info(conn, fields, condition, condition_params=None):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        query = f"SELECT {', '.join(fields)} FROM urls WHERE {condition}"
+        query = f"SELECT {fields} FROM urls WHERE {condition}"
         cursor.execute(query, condition_params)
         url_info = cursor.fetchone()
     return url_info
