@@ -118,6 +118,7 @@ def post_url_check(url_id):
 def handle_bad_request(e):
     return render_template('pages/404.html'), 404
 
+
 @app.errorhandler(500)
 def handle_internal_server_error(e):
     return render_template('pages/500.html'), 500
