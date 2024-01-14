@@ -101,13 +101,13 @@ def post_url_check(url_id):
             flash('Произошла ошибка при проверке', 'danger')
             return redirect(url_for('get_url', url_id=url_id), 302)
 
-        title, h1, description = utils.parse_html(r.text)
+        check_data = utils.parse_html(r.text)
 
     except OSError:
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('get_url', url_id=url_id), 302)
 
-    db.insert_url_check(conn, url_id, code, h1, title, description)
+    db.insert_url_check(conn, url_id, code, **check_data)
     db.close_connection(conn)
     flash('Страница успешно проверена', 'success')
 
