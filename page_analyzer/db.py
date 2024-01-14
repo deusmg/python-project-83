@@ -9,7 +9,7 @@ class UniqueViolationError(Exception):
 
 def handle_unique_violation_error(conn, url_string):
     try:
-        url_info = get_url_info(conn, ['id'], f"name='{url_string}'")
+        url_info = get_url_info_by_id(conn, url_string)
         return url_info
     finally:
         close_connection(conn)
