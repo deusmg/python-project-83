@@ -7,7 +7,6 @@ from flask import (
     url_for,
     flash,
     get_flashed_messages,
-    make_response,
     abort,
 )
 import requests
@@ -49,10 +48,7 @@ def add_urls():
     if url_errors:
         flash(*url_errors, 'danger')
         messages = get_flashed_messages(with_categories=True)
-        response = make_response(render_template('pages/index.html', url_name=url, messages=messages))
-        response.status_code = 422
-
-        return response
+        return render_template('pages/index.html', url_name=url, messages=messages), 422
 
     prepared_url = utils.prepare_url(url)
 
@@ -111,7 +107,7 @@ def post_url_check(url_id):
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('get_url', url_id=url_id), 302)
 
-    db.insert_check_result(conn, url_id, code, h1, title, description)
+    db.insert_url_check(conn, url_id, code, h1, title, description)
     db.close_connection(conn)
     flash('Страница успешно проверена', 'success')
 

@@ -98,7 +98,7 @@ def get_url_checks(conn, url_id):
     return url_checks
 
 
-def insert_check_result(conn, url_id, code, h1, title, description):
+def insert_url_check(conn, url_id, code, h1, title, description):
     with conn.cursor() as cursor:
         cursor.execute("""INSERT INTO url_checks (
                             url_id,
