@@ -72,16 +72,16 @@ def add_urls():
 def get_url(url_id):
     conn = db.get_db_connection(app.config['DATABASE_URL'])
     messages = get_flashed_messages(with_categories=True)
-    url_info_by_all = db.get_url_info_by_all(conn, url_id)
+    url_info_by_id = db.get_url_info_by_id(conn, url_id)
     url_checks = db.get_url_checks(conn, url_id)
     db.close_connection(conn)
-    if not url_info_by_all:
+    if not url_info_by_id:
         abort(404)
 
     return render_template(
         'pages/url_info.html',
         messages=messages,
-        url_info=url_info_by_all,
+        url_info=url_info_by_id,
         url_checks=url_checks
     )
 

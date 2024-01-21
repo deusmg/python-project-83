@@ -80,7 +80,7 @@ def get_url_info_by_name(conn, name):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        cursor.execute('SELECT id FROM urls WHERE name=%s', (name,))
+        cursor.execute('SELECT * FROM urls WHERE name=%s', (name,))
         url_info = cursor.fetchone()
     return url_info
 
@@ -89,7 +89,7 @@ def get_url_info_by_id(conn, url_id):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
-        cursor.execute('SELECT name FROM urls WHERE id=%s', (url_id,))
+        cursor.execute('SELECT * FROM urls WHERE id=%s', (url_id,))
         url_info = cursor.fetchone()
     return url_info
 
