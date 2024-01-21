@@ -92,21 +92,16 @@ def post_url_check(url_id):
     url_info = db.get_url_info_by_name(conn, url_id)
     try:
         r = requests.get(url_info.name)
-        code = r.status_code
-
-        if code >= 500:
-            flash('Произошла ошибка при проверке', 'danger')
-            return redirect(url_for('get_url', url_id=url_id), 302)
+        r.raise_for_status()
 
         check_data = utils.parse_html(r.text)
 
-    except OSError:
-        flash('Произошла ошибка при проверке', 'danger')
-        return redirect(url_for('get_url', url_id=url_id), 302)
+        db.insert_url_check(conn, url_id, r.status_code, **check_data)
+        db.close_connection(conn)
+        flash('Страница успешно проверена', 'success')
 
-    db.insert_url_check(conn, url_id, code, **check_data)
-    db.close_connection(conn)
-    flash('Страница успешно проверена', 'success')
+    except requests.RequestException as e:
+        flash('Произошла ошибка при проверке', 'danger')
 
     return redirect(url_for('get_url', url_id=url_id), 302)
 
