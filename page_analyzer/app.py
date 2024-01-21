@@ -100,7 +100,7 @@ def post_url_check(url_id):
         db.close_connection(conn)
         flash('Страница успешно проверена', 'success')
 
-    except requests.RequestException as e:
+    except requests.RequestException:
         flash('Произошла ошибка при проверке', 'danger')
 
     return redirect(url_for('get_url', url_id=url_id), 302)
