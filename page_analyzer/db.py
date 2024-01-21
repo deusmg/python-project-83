@@ -40,9 +40,13 @@ def get_urls_list(conn):
         urls_data = {url.id: url for url in cursor.fetchall()}
 
         cursor.execute('''
-            SELECT url_id, MAX(created_at) AS created_at, MAX(status_code) AS status_code
-            FROM url_checks
-            GROUP BY url_id;
+            SELECT url_id, created_at, status_code
+            FROM (
+                SELECT url_id, created_at, status_code,
+                       ROW_NUMBER() OVER (PARTITION BY url_id ORDER BY created_at DESC) as row_num
+                FROM url_checks
+            ) AS subquery
+            WHERE row_num = 1;
         ''')
         url_checks_data = {check.url_id: check for check in cursor.fetchall()}
 
