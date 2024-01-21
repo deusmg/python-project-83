@@ -12,13 +12,12 @@ def handle_unique_violation_error(conn, url_string):
         url_info = get_url_by_name(conn, url_string)
         return url_info
     finally:
-        close_connection(conn)
+        pass
 
 
 def add_url_with_error_handling(conn, url_string):
     try:
         url_info = add_url(conn, url_string)
-        close_connection(conn)
         return url_info
     except psycopg2.errors.UniqueViolation:
         raise UniqueViolationError
