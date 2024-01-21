@@ -51,7 +51,7 @@ def add_urls():
         return render_template('pages/index.html', url_name=url, messages=messages), 422
 
     prepared_url = utils.prepare_url(url)
-    url_info = db.get_url_info_by_name(conn, prepared_url)
+    url_info = db.get_url_by_name(conn, prepared_url)
 
     if url_info:
         flash('Страница уже существует', 'info')
@@ -72,16 +72,16 @@ def add_urls():
 def get_url(url_id):
     conn = db.get_db_connection(app.config['DATABASE_URL'])
     messages = get_flashed_messages(with_categories=True)
-    url_info_by_id = db.get_url_info_by_id(conn, url_id)
+    url_by_id = db.get_url_by_id(conn, url_id)
     url_checks = db.get_url_checks(conn, url_id)
     db.close_connection(conn)
-    if not url_info_by_id:
+    if not url_by_id:
         abort(404)
 
     return render_template(
         'pages/url_info.html',
         messages=messages,
-        url_info=url_info_by_id,
+        url_info=url_by_id,
         url_checks=url_checks
     )
 
@@ -89,7 +89,7 @@ def get_url(url_id):
 @app.post('/urls/<int:url_id>/checks')
 def post_url_check(url_id):
     conn = db.get_db_connection(app.config['DATABASE_URL'])
-    url_info = db.get_url_info_by_id(conn, url_id)
+    url_info = db.get_url_by_id(conn, url_id)
     try:
         r = requests.get(url_info.name)
         r.raise_for_status()

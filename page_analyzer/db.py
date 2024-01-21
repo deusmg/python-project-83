@@ -9,7 +9,7 @@ class UniqueViolationError(Exception):
 
 def handle_unique_violation_error(conn, url_string):
     try:
-        url_info = get_url_info_by_name(conn, url_string)
+        url_info = get_url_by_name(conn, url_string)
         return url_info
     finally:
         close_connection(conn)
@@ -76,7 +76,7 @@ def add_url(conn, url_string):
     return url_id
 
 
-def get_url_info_by_name(conn, name):
+def get_url_by_name(conn, name):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
@@ -85,7 +85,7 @@ def get_url_info_by_name(conn, name):
     return url_info
 
 
-def get_url_info_by_id(conn, url_id):
+def get_url_by_id(conn, url_id):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
@@ -94,22 +94,13 @@ def get_url_info_by_id(conn, url_id):
     return url_info
 
 
-def get_url_info_by_all(conn, url_id):
-    with conn.cursor(
-            cursor_factory=psycopg2.extras.NamedTupleCursor
-    ) as cursor:
-        cursor.execute('SELECT * FROM urls WHERE id=%s', (url_id,))
-        url_checks = cursor.fetchone()
-    return url_checks
-
-
 def get_url_checks(conn, url_id):
     with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
     ) as cursor:
         cursor.execute('SELECT * FROM url_checks WHERE url_id=%s', (url_id,))
-        url_checks = cursor.fetchall()
-    return url_checks
+        url = cursor.fetchall()
+    return url
 
 
 def insert_url_check(conn, url_id, code, h1, title, description):
