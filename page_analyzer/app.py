@@ -17,7 +17,7 @@ from page_analyzer import db
 app = Flask(__name__)
 load_dotenv()
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-DATABASE_URL = os.getenv('DATABASE_URL')
+app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
 
 
 @app.route('/')
@@ -27,7 +27,7 @@ def index():
 
 @app.get('/urls')
 def get_urls():
-    conn = db.get_db_connection(DATABASE_URL)
+    conn = db.get_db_connection(app.config['DATABASE_URL'])
     urls = db.get_urls_list(conn)
     db.close_connection(conn)
     messages = get_flashed_messages(with_categories=True)
@@ -41,7 +41,7 @@ def get_urls():
 
 @app.post('/urls')
 def add_urls():
-    conn = db.get_db_connection(DATABASE_URL)
+    conn = db.get_db_connection(app.config['DATABASE_URL'])
     url = request.form.get('url')
     url_errors = utils.url_validate(url)
 
@@ -73,7 +73,7 @@ def add_urls():
 
 @app.route('/urls/<int:url_id>')
 def get_url(url_id):
-    conn = db.get_db_connection(DATABASE_URL)
+    conn = db.get_db_connection(app.config['DATABASE_URL'])
     messages = get_flashed_messages(with_categories=True)
     url_info_by_all = db.get_url_info_by_all(conn, url_id)
     url_checks = db.get_url_checks(conn, url_id)
@@ -91,7 +91,7 @@ def get_url(url_id):
 
 @app.post('/urls/<int:url_id>/checks')
 def post_url_check(url_id):
-    conn = db.get_db_connection(DATABASE_URL)
+    conn = db.get_db_connection(app.config['DATABASE_URL'])
     url_info = db.get_url_info_by_name(conn, url_id)
     try:
         r = requests.get(url_info.name)

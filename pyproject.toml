@@ -1,10 +1,20 @@
 [tool.poetry]
 name = "hexlet-code"
 version = "0.1.0"
-description = ""
+description = "Service for page analysis. It checks the response code and the presence of tags."
 authors = ["deusmg <laptevap@gmail.com>"]
 readme = "README.md"
 packages = [{include = "page_analyzer"}]
+
+repository = "https://github.com/deusmg/python-project-83"
+classifiers = [
+    "License :: Free for non-commercial use",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "Natural Language :: Russian",
+    "Programming Language :: Python :: 3.10",
+    "Operating System :: OS Independent"
+]
 
 [tool.poetry.dependencies]
 python = "^3.10.0"
