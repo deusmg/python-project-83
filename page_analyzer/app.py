@@ -51,22 +51,19 @@ def add_urls():
         return render_template('pages/index.html', url_name=url, messages=messages), 422
 
     prepared_url = utils.prepare_url(url)
+    url_info = db.get_url_info_by_id(conn, prepared_url)
 
-    try:
-        url_info = db.get_url_info_by_id(conn, prepared_url)
-        if url_info:
-            flash('Страница уже существует', 'info')
-        else:
-            if db.url_exists(conn, prepared_url):
-                return db.get_url_info_by_id(conn, prepared_url)
-            else:
-                url_info = db.add_url_with_error_handling(conn, prepared_url)
-                flash('Страница успешно добавлена', 'success')
-        db.close_connection(conn)
-    except db.UniqueViolationError:
-        url_info = db.handle_unique_violation_error(conn, prepared_url)
+    if url_info:
         flash('Страница уже существует', 'info')
-        db.close_connection(conn)
+    else:
+        try:
+            url_info = db.add_url_with_error_handling(conn, prepared_url)
+            flash('Страница успешно добавлена', 'success')
+        except db.UniqueViolationError:
+            url_info = db.handle_unique_violation_error(conn, prepared_url)
+            flash('Страница уже существует', 'info')
+
+    db.close_connection(conn)
 
     return redirect(url_for('get_url', url_id=url_info.id), 302)
 
